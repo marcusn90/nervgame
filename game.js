@@ -47,10 +47,12 @@ playState = {
         ]);
         
         this.enemies = this.game.add.group();
-        for ( var i = 0; i < 2; i++ ) {
+        for ( var i = 0; i < 5; i++ ) {
             var enemy = game.add.sprite(20, 20, 'character');
             enemy.anchor.setTo(0.5, 0.5);
-            enemy.reset(40 + i*70, 40 + i*100);
+            var _x = this.game.rnd.between(100,500);
+            var _y = this.game.rnd.between(100,500);
+            enemy.reset(_x, _y);
             this.game.physics.enable(enemy, Phaser.Physics.ARCADE);
             this.enemies.add(enemy);
         }
