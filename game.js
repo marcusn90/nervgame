@@ -1,4 +1,5 @@
 var game = new Phaser.Game(600, 600, Phaser.AUTO, 'body');
+
 playState = {
     init: function() {
     //Called as soon as we enter this state
@@ -23,7 +24,8 @@ playState = {
         this.game.input.activePointer.x = this.game.width/2;
         this.game.input.activePointer.y = this.game.height/2 - 100;
         this.playerSpeed = 300;
-        this.BULLET_SPEED = 700;
+        this.BULLET_SPEED = 600;
+        this.WORLD_SPEED = 1;
         this.player.bulletPool = this.game.add.group();
         for(var i = 0; i < 100; i++) {
             // Create each bullet and add it to the group.
@@ -43,7 +45,8 @@ playState = {
             Phaser.Keyboard.A,
             Phaser.Keyboard.D,
             Phaser.Keyboard.W,
-            Phaser.Keyboard.S
+            Phaser.Keyboard.S,
+            Phaser.Keyboard.SHIFT
         ]);
         
         this.enemies = this.game.add.group();
@@ -74,12 +77,18 @@ playState = {
         } else {
             this.player.body.velocity.y = 0;
         }
+        if ( this.input.keyboard.isDown(Phaser.Keyboard.SHIFT) ) {
+            this.WORLD_SPEED = 0.03;
+        } else {
+            this.WORLD_SPEED = 1;
+        }
         
         this.player.rotation = this.game.physics.arcade.angleToPointer(this.player);
         if ( this.game.input.activePointer.isDown ) {
             this.shoot();
             console.log(this.player.bulletPool.length);
         }
+        this.updateBulletsVelocity();
         
 
         this.game.physics.arcade.collide(this.player.bulletPool, this.enemies, function(b,e){
@@ -91,6 +100,13 @@ playState = {
         
     },
     
+    updateBulletsVelocity: function () {
+        this.player.bulletPool.forEachAlive(function(b){
+            b.body.velocity.x = Math.cos(b.rotation) * this.BULLET_SPEED * this.WORLD_SPEED;
+            b.body.velocity.y = Math.sin(b.rotation) * this.BULLET_SPEED * this.WORLD_SPEED;
+        },this);
+    },
+
     shoot: function () {
         var bullet = this.player.bulletPool.getFirstDead();
 //        var bullet = this.player.bulletPool.getFirstAlive();
@@ -114,12 +130,10 @@ playState = {
         bullet.rotation = this.player.rotation;
 
         // Shoot it in the right direction
-        bullet.body.velocity.x = Math.cos(bullet.rotation) * this.BULLET_SPEED;
-        bullet.body.velocity.y = Math.sin(bullet.rotation) * this.BULLET_SPEED;
+        bullet.body.velocity.x = Math.cos(bullet.rotation) * this.BULLET_SPEED * this.WORLD_SPEED;
+        bullet.body.velocity.y = Math.sin(bullet.rotation) * this.BULLET_SPEED * this.WORLD_SPEED;
     }
 };
 
 game.state.add('play', playState);
 game.state.start('play');
-
-console.log('Current state: ' + game.state.getCurrentState());
