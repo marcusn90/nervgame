@@ -2,19 +2,14 @@ var game = new Phaser.Game(600, 600, Phaser.AUTO, 'body');
 
 playState = {
     init: function() {
-    //Called as soon as we enter this state
-        console.log('state init');
     },
 
     preload: function() {
-        console.log('state preload');
         this.game.load.spritesheet('character', 'assets/character.png');
         this.game.load.image('bullet','assets/bullet.png');
-    //Assets to be loaded before create() is called
     },
 
     create: function() {
-        console.log('state create');
         this.game.stage.backgroundColor = '#dfdfdf';
         this.player = game.add.sprite(20, 20, 'character');
         this.player.anchor.setTo(0.5, 0.5);
@@ -23,22 +18,15 @@ playState = {
       
         this.game.input.activePointer.x = this.game.width/2;
         this.game.input.activePointer.y = this.game.height/2 - 100;
-        this.playerSpeed = 300;
+        this.playerSpeed = 250;
         this.BULLET_SPEED = 600;
         this.WORLD_SPEED = 1;
         this.player.bulletPool = this.game.add.group();
         for(var i = 0; i < 100; i++) {
-            // Create each bullet and add it to the group.
             var bullet = this.game.add.sprite(0, 0, 'bullet');
             this.player.bulletPool.add(bullet);
-
-            // Set its pivot point to the center of the bullet
             bullet.anchor.setTo(0.5, 0.5);
-
-            // Enable physics on the bullet
             this.game.physics.enable(bullet, Phaser.Physics.ARCADE);
-
-            // Set its initial state to "dead".
             bullet.kill();
         }
         this.game.input.keyboard.addKeyCapture([
@@ -92,7 +80,6 @@ playState = {
         
 
         this.game.physics.arcade.collide(this.player.bulletPool, this.enemies, function(b,e){
-            console.log('ENEMY KILLED');
             e.kill();
             b.kill();
         }, null, this);
@@ -109,27 +96,13 @@ playState = {
 
     shoot: function () {
         var bullet = this.player.bulletPool.getFirstDead();
-//        var bullet = this.player.bulletPool.getFirstAlive();
-
-        // If there aren't any bullets available then don't shoot
         if (bullet === null || bullet === undefined) return;
-       
-        // Revive the bullet
-        // This makes the bullet "alive"
-        bullet.revive();
 
-        // Bullets should kill themselves when they leave the world.
-        // Phaser takes care of this for me by setting this flag
-        // but you can do it yourself by killing the bullet if
-        // its x,y coordinates are outside of the world.
+        bullet.revive();
         bullet.checkWorldBounds = true;
         bullet.outOfBoundsKill = true;
-
-        // Set the bullet position to the gun position.
         bullet.reset(this.player.x, this.player.y);
         bullet.rotation = this.player.rotation;
-
-        // Shoot it in the right direction
         bullet.body.velocity.x = Math.cos(bullet.rotation) * this.BULLET_SPEED * this.WORLD_SPEED;
         bullet.body.velocity.y = Math.sin(bullet.rotation) * this.BULLET_SPEED * this.WORLD_SPEED;
     }
